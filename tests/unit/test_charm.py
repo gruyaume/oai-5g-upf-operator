@@ -5,6 +5,17 @@ import unittest
 from unittest.mock import patch
 
 import ops.testing
+from lightkube.models.apps_v1 import StatefulSet, StatefulSetSpec
+from lightkube.models.core_v1 import (
+    Container,
+    PodSecurityContext,
+    PodSpec,
+    PodTemplateSpec,
+    SecurityContext,
+)
+from lightkube.models.meta_v1 import LabelSelector
+from lightkube.resources.apps_v1 import StatefulSet as StatefulSetResource
+from lightkube.types import PatchType
 from ops.model import ActiveStatus
 from ops.testing import Harness
 
@@ -12,15 +23,18 @@ from charm import Oai5GUPFOperatorCharm
 
 
 class TestCharm(unittest.TestCase):
+    @patch("lightkube.core.client.GenericSyncClient")
     @patch(
         "charm.KubernetesServicePatch",
         lambda charm, ports: None,
     )
-    def setUp(self):
+    def setUp(self, patch_lightkube):
         ops.testing.SIMULATE_CAN_CONNECT = True
+        self.namespace = "whatever"
         self.addCleanup(setattr, ops.testing, "SIMULATE_CAN_CONNECT", False)
         self.harness = Harness(Oai5GUPFOperatorCharm)
         self.addCleanup(self.harness.cleanup)
+        self.harness.set_model_name(name=self.namespace)
         self.harness.begin()
 
     def _create_nrf_relation_with_valid_data(self):
@@ -41,6 +55,42 @@ class TestCharm(unittest.TestCase):
             relation_id=relation_id, app_or_unit="nrf", key_values=key_values
         )
         return nrf_ipv4_address, nrf_port, nrf_api_version, nrf_fqdn
+
+    @patch("lightkube.Client.patch")
+    @patch("lightkube.Client.get")
+    def test_given_statefulset_not_yet_patched_when_on_install_then_statefulset_is_patched(
+        self, patch_k8s_get, patch_k8s_patch
+    ):
+        patch_k8s_get.return_value = StatefulSet(
+            spec=StatefulSetSpec(
+                template=PodTemplateSpec(
+                    spec=PodSpec(
+                        containers=[
+                            Container(
+                                name="charm",
+                            ),
+                            Container(name="workload", securityContext=SecurityContext()),
+                        ],
+                        securityContext=PodSecurityContext(),
+                    )
+                ),
+                serviceName="upf",
+                selector=LabelSelector(),
+            )
+        )
+        self.harness.charm.on.install.emit()
+
+        args, kwargs = patch_k8s_patch.call_args
+
+        self.assertEqual(kwargs["name"], "oai-5g-upf")
+        self.assertEqual(kwargs["namespace"], self.namespace)
+        self.assertEqual(kwargs["res"], StatefulSetResource)
+        self.assertEqual(kwargs["patch_type"], PatchType.MERGE)
+        self.assertEqual(kwargs["obj"].spec.template.spec.securityContext.runAsUser, 0)
+        self.assertEqual(kwargs["obj"].spec.template.spec.securityContext.runAsGroup, 0)
+        self.assertEqual(
+            kwargs["obj"].spec.template.spec.containers[1].securityContext.privileged, True
+        )
 
     @patch("ops.model.Container.push")
     def test_given_nrf_relation_contains_nrf_info_when_nrf_relation_joined_then_config_file_is_pushed(  # noqa: E501
@@ -166,7 +216,7 @@ class TestCharm(unittest.TestCase):
             "       ENABLE_5G_FEATURES = \"yes\" # Set to 'yes' to support 5G Features\n"
             "       REGISTER_NRF = \"yes\";            # Set to 'yes' if UPF resgisters to an NRF\n"  # noqa: E501, W505
             "       USE_FQDN_NRF = \"yes\";            # Set to 'yes' if UPF relies on a DNS/FQDN service to resolve NRF's FQDN\n"  # noqa: E501, W505
-            '       UPF_FQDN_5G  = "oai-5g-upf.None.svc.cluster.local";             # Set FQDN of UPF\n\n'  # noqa: E501, W505
+            f'       UPF_FQDN_5G  = "oai-5g-upf.{self.namespace}.svc.cluster.local";             # Set FQDN of UPF\n\n'  # noqa: E501, W505
             "       NRF :\n"
             "       {\n"
             f'          IPV4_ADDRESS = "{ nrf_ipv4_address }";  # YOUR NRF CONFIG HERE\n'

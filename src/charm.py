@@ -13,9 +13,11 @@ from charms.observability_libs.v1.kubernetes_service_patch import (  # type: ign
     ServicePort,
 )
 from jinja2 import Environment, FileSystemLoader
-from ops.charm import CharmBase, ConfigChangedEvent
+from ops.charm import CharmBase, ConfigChangedEvent, InstallEvent
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
+
+from kubernetes import Kubernetes
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,7 @@ class Oai5GUPFOperatorCharm(CharmBase):
         super().__init__(*args)
         self._container_name = "upf"
         self._container = self.unit.get_container(self._container_name)
+        self.kubernetes = Kubernetes(namespace=self.model.name)
         self.service_patcher = KubernetesServicePatch(
             charm=self,
             ports=[
@@ -49,8 +52,25 @@ class Oai5GUPFOperatorCharm(CharmBase):
             ],
         )
         self.nrf_requires = FiveGNRFRequires(self, "fiveg-nrf")
+        self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.fiveg_nrf_relation_changed, self._on_config_changed)
+
+    def _on_install(self, event: InstallEvent) -> None:
+        """Triggered on install event.
+
+        Args:
+            event: Juju event
+
+        Returns:
+            None
+        """
+        if not self.kubernetes.statefulset_is_patched(
+            statefulset_name=self.app.name,
+        ):
+            self.kubernetes.patch_statefulset(
+                statefulset_name=self.app.name,
+            )
 
     def _on_config_changed(self, event: ConfigChangedEvent) -> None:
         """Triggered on any change in configuration.

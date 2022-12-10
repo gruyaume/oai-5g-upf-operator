@@ -31,7 +31,7 @@ class Oai5GUPFOperatorCharm(CharmBase):
     def __init__(self, *args):
         """Observes juju events."""
         super().__init__(*args)
-        self._container_name = "upf"
+        self._container_name = self._service_name = "upf"
         self._container = self.unit.get_container(self._container_name)
         self.kubernetes = Kubernetes(namespace=self.model.name)
         self.service_patcher = KubernetesServicePatch(
@@ -106,6 +106,7 @@ class Oai5GUPFOperatorCharm(CharmBase):
         """
         self._container.add_layer("upf", self._pebble_layer, combine=True)
         self._container.replan()
+        self._container.restart(self._service_name)
         self.unit.status = ActiveStatus()
 
     @property
@@ -302,7 +303,7 @@ class Oai5GUPFOperatorCharm(CharmBase):
             "summary": "upf layer",
             "description": "pebble config layer for upf",
             "services": {
-                "upf": {
+                self._service_name: {
                     "override": "replace",
                     "summary": "upf",
                     "command": f"/openair-spgwu-tiny/bin/oai_spgwu -c {BASE_CONFIG_PATH}/{CONFIG_FILE_NAME} -o",  # noqa: E501

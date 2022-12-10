@@ -8,6 +8,7 @@
 import logging
 
 from charms.oai_5g_nrf.v0.fiveg_nrf import FiveGNRFRequires  # type: ignore[import]
+from charms.oai_5g_upf.v0.fiveg_upf import FiveGUPFProvides  # type: ignore[import]
 from charms.observability_libs.v1.kubernetes_service_patch import (  # type: ignore[import]
     KubernetesServicePatch,
     ServicePort,
@@ -51,10 +52,28 @@ class Oai5GUPFOperatorCharm(CharmBase):
                 ),
             ],
         )
+        self.upf_provides = FiveGUPFProvides(self, "fiveg-upf")
         self.nrf_requires = FiveGNRFRequires(self, "fiveg-nrf")
+        self.framework.observe(
+            self.on.fiveg_upf_relation_joined, self._on_fiveg_upf_relation_joined
+        )
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.fiveg_nrf_relation_changed, self._on_config_changed)
+
+    def _on_fiveg_upf_relation_joined(self, event) -> None:
+        """Triggered when a relation is joined.
+
+        Args:
+            event: Relation Joined Event
+        """
+        if not self.unit.is_leader():
+            return
+        self.upf_provides.set_upf_information(
+            upf_ipv4_address="127.0.0.1",
+            upf_fqdn=f"{self.model.app.name}.{self.model.name}.svc.cluster.local",
+            relation_id=event.relation.id,
+        )
 
     def _on_install(self, event: InstallEvent) -> None:
         """Triggered on install event.

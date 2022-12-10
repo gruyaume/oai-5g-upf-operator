@@ -127,7 +127,7 @@ class Oai5GUPFOperatorCharm(CharmBase):
             nssai_sst_1=self._config_nssai_sst_1,
             nssai_sd_1=self._config_nssai_sd_1,
             dnn_1=self._config_dnn_1,
-            nssa_sst_2=self._config_nssai_sst_2,
+            nssai_sst_2=self._config_nssai_sst_2,
             nssai_sd_2=self._config_nssai_sd_2,
             dnn_2=self._config_dnn_2,
             nssai_sst_3=self._config_nssai_sst_3,

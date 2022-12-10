@@ -179,7 +179,7 @@ class TestCharm(unittest.TestCase):
             "       UPF_INFO = (\n"
             '          { NSSAI_SST = 1; NSSAI_SD = "1";  DNN_LIST = ({DNN = "oai";}); },\n'
             '          { NSSAI_SST = 1; NSSAI_SD = "1";  DNN_LIST = ({DNN = "oai";}); },\n'
-            '          { NSSAI_SST = ; NSSAI_SD = "1";  DNN_LIST = ({DNN = "oai";}); },\n'
+            '          { NSSAI_SST = 1; NSSAI_SD = "1";  DNN_LIST = ({DNN = "oai";}); },\n'
             '          { NSSAI_SST = 1; NSSAI_SD = "1";  DNN_LIST = ({DNN = "oai";}); }\n'
             "       );\n"
             "    }\n"

@@ -1,0 +1,30 @@
+name: oai-5g-upf
+
+summary: OpenAirInterface 5G Core Network upf
+
+description: |
+  OPENAIR-CN-5G is an implementation of the 3GPP specifications for the 5G Core Network. This 
+  charms deploys the upf component of the 5G Core Network.
+
+containers:
+  upf:
+    resource: upf-image
+    mounts:
+      - storage: config
+        location: /openair-spgwu-tiny/etc
+
+storage:
+  config:
+    type: filesystem
+    description: upf Config directory
+    minimum-size: 1G
+
+resources:
+  upf-image:
+    type: oci-image
+    description: OCI image for upf
+    upstream-source: docker.io/oaisoftwarealliance/oai-spgwu-tiny:v1.4.0
+
+requires:
+  fiveg-nrf:
+    interface: fiveg-nrf

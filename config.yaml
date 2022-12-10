@@ -1,0 +1,66 @@
+options:
+  gw-id:
+    type: string
+    description: |
+      The gateway ID of the UPF.
+    default: "1"
+    required: true
+  mcc:
+    type: string
+    description: |
+      The Mobile Country Code (MCC) of the UPF.
+    default: "208"
+    required: true
+  mnc:
+    type: string
+    description: |
+      The Mobile Network Code (MNC) of the UPF.
+    default: "99"
+    required: true
+  realm:
+    type: string
+    description: |
+      The realm of the UPF.
+    default: "3gpp.org"
+    required: true
+  sgw-s1u-interface:
+    type: string
+    description: |
+      The S1U interface of the SGW.
+    default: "eth0"
+    required: true
+  thread-s1u-priority:
+    type: string
+    description: |
+      The thread priority of the S1U interface.
+    default: "88"
+    required: true
+  sgw-sx-interface:
+    type: string
+    description: |
+      The SX interface of the SGW.
+    default: "eth0"
+    required: true
+  thread-sx-priority:
+    type: string
+    description: |
+      The thread priority of the SX interface.
+    default: "88"
+    required: true
+  pgw-sgi-interface:
+    type: string
+    description: |
+      The SGI interface of the PGW.
+    default: "eth0"
+    required: true
+  thread-sgi-priority:
+    type: string
+    description: |
+      The thread priority of the SGI interface.
+    default: "98"
+    required: true
+  network-ue-ip:
+    type: string
+    description: |
+      The UE IP address of the UPF.
+    default: "12.1.1.0/24"

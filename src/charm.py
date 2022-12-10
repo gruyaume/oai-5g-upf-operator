@@ -69,11 +69,23 @@ class Oai5GUPFOperatorCharm(CharmBase):
         """
         if not self.unit.is_leader():
             return
+        if not self._upf_service_started:
+            logger.info("UPF service not started yet, deferring event")
+            event.defer()
+            return
         self.upf_provides.set_upf_information(
             upf_ipv4_address="127.0.0.1",
             upf_fqdn=f"{self.model.app.name}.{self.model.name}.svc.cluster.local",
             relation_id=event.relation.id,
         )
+
+    @property
+    def _upf_service_started(self) -> bool:
+        if not self._container.can_connect():
+            return False
+        if not self._container.get_service(self._service_name).is_running():
+            return False
+        return True
 
     def _on_install(self, event: InstallEvent) -> None:
         """Triggered on install event.

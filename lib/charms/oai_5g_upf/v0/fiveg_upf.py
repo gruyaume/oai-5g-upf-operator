@@ -9,7 +9,6 @@ from typing import Optional
 from ops.charm import CharmBase, CharmEvents, RelationChangedEvent
 from ops.framework import EventBase, EventSource, Handle, Object
 
-
 # The unique Charmhub library identifier, never change it
 LIBID = "ed9606f2aaa64099937b7f57add2c42d"
 
@@ -18,7 +17,7 @@ LIBAPI = 0
 
 # Increment this PATCH version before using `charmcraft publish-lib` or reset
 # to 0 if you are raising the major API version
-LIBPATCH = 1
+LIBPATCH = 2
 
 
 logger = logging.getLogger(__name__)

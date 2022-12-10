@@ -17,6 +17,7 @@ from lightkube.models.meta_v1 import LabelSelector
 from lightkube.resources.apps_v1 import StatefulSet as StatefulSetResource
 from lightkube.types import PatchType
 from ops.model import ActiveStatus
+from ops.pebble import ServiceInfo, ServiceStartup, ServiceStatus
 from ops.testing import Harness
 
 from charm import Oai5GUPFOperatorCharm
@@ -260,8 +261,17 @@ class TestCharm(unittest.TestCase):
         self.assertTrue(service.is_running())
         self.assertEqual(self.harness.model.unit.status, ActiveStatus())
 
-    def test_given_unit_is_leader_when_upf_relation_joined_then_upf_relation_data_is_set(self):
+    @patch("ops.model.Container.get_service")
+    def test_given_unit_is_leader_when_upf_relation_joined_then_upf_relation_data_is_set(
+        self, patch_get_service
+    ):
         self.harness.set_leader(True)
+        self.harness.set_can_connect(container="upf", val=True)
+        patch_get_service.return_value = ServiceInfo(
+            name="upf",
+            current=ServiceStatus.ACTIVE,
+            startup=ServiceStartup.ENABLED,
+        )
 
         relation_id = self.harness.add_relation(relation_name="fiveg-upf", remote_app="upf")
         self.harness.add_relation_unit(relation_id=relation_id, remote_unit_name="upf/0")

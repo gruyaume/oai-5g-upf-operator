@@ -28,3 +28,7 @@ resources:
 requires:
   fiveg-nrf:
     interface: fiveg-nrf
+
+provides:
+  fiveg-upf:
+    interface: fiveg-upf

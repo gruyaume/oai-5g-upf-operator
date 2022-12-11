@@ -16,7 +16,7 @@ from charms.observability_libs.v1.kubernetes_service_patch import (  # type: ign
 from jinja2 import Environment, FileSystemLoader
 from ops.charm import CharmBase, ConfigChangedEvent, InstallEvent
 from ops.main import main
-from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
+from ops.model import ActiveStatus, BlockedStatus, ModelError, WaitingStatus
 
 from kubernetes import Kubernetes
 
@@ -83,7 +83,11 @@ class Oai5GUPFOperatorCharm(CharmBase):
     def _upf_service_started(self) -> bool:
         if not self._container.can_connect():
             return False
-        if not self._container.get_service(self._service_name).is_running():
+        try:
+            service = self._container.get_service(self._service_name)
+        except ModelError:
+            return False
+        if not service.is_running():
             return False
         return True
 
@@ -138,7 +142,6 @@ class Oai5GUPFOperatorCharm(CharmBase):
         self._container.add_layer("upf", self._pebble_layer, combine=True)
         self._container.replan()
         self._container.restart(self._service_name)
-        self.unit.status = ActiveStatus()
 
     @property
     def _nrf_relation_created(self) -> bool:

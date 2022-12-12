@@ -232,27 +232,27 @@ class Oai5GUPFOperatorCharm(CharmBase):
 
     @property
     def _config_sgw_s1u_interface(self) -> str:
-        return self.model.config["sgw-s1u-interface"]
+        return "eth0"
 
     @property
     def _config_thread_s1u_priority(self) -> str:
-        return self.model.config["thread-s1u-priority"]
+        return "88"
 
     @property
     def _config_sgw_sx_interface(self) -> str:
-        return self.model.config["sgw-sx-interface"]
+        return "eth0"
 
     @property
     def _config_thread_sx_priority(self) -> str:
-        return self.model.config["thread-sx-priority"]
+        return "88"
 
     @property
     def _config_pgw_sgi_interface(self) -> str:
-        return self.model.config["pgw-sgi-interface"]
+        return "eth0"
 
     @property
     def _config_thread_sgi_priority(self) -> str:
-        return self.model.config["thread-sgi-priority"]
+        return "98"
 
     @property
     def _config_network_ue_ip(self) -> str:

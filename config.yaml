@@ -23,42 +23,6 @@ options:
       The realm of the UPF.
     default: "3gpp.org"
     required: true
-  sgw-s1u-interface:
-    type: string
-    description: |
-      The S1U interface of the SGW.
-    default: "eth0"
-    required: true
-  thread-s1u-priority:
-    type: string
-    description: |
-      The thread priority of the S1U interface.
-    default: "88"
-    required: true
-  sgw-sx-interface:
-    type: string
-    description: |
-      The SX interface of the SGW.
-    default: "eth0"
-    required: true
-  thread-sx-priority:
-    type: string
-    description: |
-      The thread priority of the SX interface.
-    default: "88"
-    required: true
-  pgw-sgi-interface:
-    type: string
-    description: |
-      The SGI interface of the PGW.
-    default: "eth0"
-    required: true
-  thread-sgi-priority:
-    type: string
-    description: |
-      The thread priority of the SGI interface.
-    default: "98"
-    required: true
   network-ue-ip:
     type: string
     description: |
